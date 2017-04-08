@@ -6,7 +6,11 @@
   "icons": {
     "128": "images/evil-jenkins.png"
   },
-  "browser_action": {
+  "background": {
+    "scripts": ["app/background.js"],
+    "persistent": false
+  },
+  "page_action": {
     "default_icon": { "48": "images/evil-jenkins.png" },
     "default_title": "Failing Specs",
     "default_popup": "index.html"
@@ -15,6 +19,7 @@
   "offline_enabled": false,
   "permissions": [
     "debugger",
-    "storage"
+    "storage",
+    "declarativeContent"
   ]
 }
