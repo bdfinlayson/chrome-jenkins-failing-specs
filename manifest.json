@@ -4,7 +4,6 @@
   "version": "1.0",
   "description": "This extension helps identify buggy specs in recent Jenkins build failures",
   "icons": {
-    "16": "images/evil-jenkins.png",
     "128": "images/evil-jenkins.png"
   },
   "browser_action": {
