@@ -4,12 +4,11 @@
   "version": "1.0",
   "description": "This extension helps identify buggy specs in recent Jenkins build failures",
   "icons": {
-    "16": "images/icon16.png",
-    "48": "images/icon48.png",
-    "128": "images/icon128.png"
+    "16": "images/evil-jenkins.png",
+    "128": "images/evil-jenkins.png"
   },
   "browser_action": {
-    "default_icon": { "16": "images/icon16.png" },
+    "default_icon": { "48": "images/evil-jenkins.png" },
     "default_title": "Failing Specs",
     "default_popup": "index.html"
   },
