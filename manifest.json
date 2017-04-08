@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "Chrome Jenkins Failing Specs",
+  "version": "1.0",
+  "default_locale": "en",
+  "description": "This extension helps identify buggy specs in recent Jenkins build failures",
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "browser_action": {
+    "default_icon": { "16": "images/icon16.png" },
+    "default_title": "Failing Specs",
+    "default_popup": "index.html"
+  },
+  "author": "Bryan Finlayson",
+  "background": {
+    "persistent": false
+  },
+  "offline_enabled": false,
+  "permissions": [
+    "debugger",
+    "storage"
+  ]
+}
