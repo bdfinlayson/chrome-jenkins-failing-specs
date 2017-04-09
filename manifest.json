@@ -15,9 +15,16 @@
     "default_title": "Failing Specs",
     "default_popup": "index.html"
   },
+  "content_scripts": [{
+    "matches": ["https://*.com/view/*/job/"],
+    "include_globs": ["*https://jenkins.*"],
+    "exclude_globs": ["https://*.com/view/*/job/*/*/"],
+    "js": ["app/content.js"]
+  }],
   "author": "Bryan Finlayson",
   "offline_enabled": false,
   "permissions": [
+    "activeTab",
     "debugger",
     "storage",
     "declarativeContent"
