@@ -3,7 +3,8 @@ chrome.runtime.onInstalled.addListener(function() {
      var jenkinsRule = {
        conditions: [
          new chrome.declarativeContent.PageStateMatcher({
-           pageUrl: { hostPrefix: 'jenkins.', hostSuffix: '.com', schemes: ['https'] }
+           pageUrl: { hostPrefix: 'jenkins.', hostSuffix: '.com', schemes: ['https'] },
+           css: ['div[id=buildHistory]']
          })
        ],
        actions: [ new chrome.declarativeContent.ShowPageAction() ]
