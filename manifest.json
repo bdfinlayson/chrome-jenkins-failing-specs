@@ -19,7 +19,8 @@
     "matches": ["https://*.com/view/*/job/"],
     "include_globs": ["*https://jenkins.*"],
     "exclude_globs": ["https://*.com/view/*/job/*/*/"],
-    "js": ["app/content.js"]
+    "js": ["app/content.js"],
+    "run_at": "document_end"
   }],
   "author": "Bryan Finlayson",
   "offline_enabled": false,
