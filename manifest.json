@@ -16,7 +16,7 @@
     "default_popup": "index.html"
   },
   "content_scripts": [{
-    "matches": ["https://*.com/view/*/job/"],
+    "matches": ["https://*.com/view/*/job/*/"],
     "include_globs": ["*https://jenkins.*"],
     "exclude_globs": ["https://*.com/view/*/job/*/*/"],
     "js": ["app/content.js"],
