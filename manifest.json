@@ -16,9 +16,9 @@
     "default_popup": "index.html"
   },
   "content_scripts": [{
-    "matches": ["https://*.com/view/*/job/*/"],
+    "matches": ["https://*.com/view/*/job/*/", "https://*.com/job/*/"],
     "include_globs": ["*https://jenkins.*"],
-    "exclude_globs": ["https://*.com/view/*/job/*/*/"],
+    "exclude_globs": ["https://*.com/view/*/job/*/*/", "*/HTML_Report/*"],
     "js": ["app/content.js"],
     "run_at": "document_end"
   }],
