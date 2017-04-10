@@ -1,4 +1,3 @@
-console.log('i am content script');
 failures_count = document.getElementById('buildHistory').getElementsByClassName('icon-red').length
 if(failures_count > 0) {
   failed_build_urls = []
@@ -10,6 +9,16 @@ if(failures_count > 0) {
   }
   console.log(failures_count)
   console.log(failed_build_urls)
-  chrome.runtime.sendMessage({failures: true, count: failures_count, failed_build_urls: failed_build_urls, root_path: window.location.href }, function(response) {
-    console.log(response.data)})
+  chrome.runtime.sendMessage({
+    failures: true,
+    count: failures_count,
+    failed_build_urls: failed_build_urls,
+    root_path: window.location.href
+  },function(response) {
+      console.log(response.data, response.status)
+      names = response.data.map(function(obj) { return obj.name })
+      stacks = response.data.map(function(obj) { return obj.stackTrace })
+      console.log(names)
+      console.log(stacks)
+    })
 }

@@ -15,37 +15,42 @@ chrome.runtime.onInstalled.addListener(function() {
 
  chrome.runtime.onMessage.addListener(
    function(request, sender, sendResponse) {
+     var data = []
+     var rootPath = request.rootPath
+     xmlhttp = []
+     xmlhttp2 = []
+
      if(request.failures) {
-       var data = []
-       var resultLinks = []
-       var rootPath = window.location.href //request.rootPath
-       xmlhttp = []
-       xmlhttp2 = []
-       for(i = 0; i < failures.length; i++) {
+
+       //getting build results
+       for(i = 0; i < request.failed_build_urls.length; i++) {
          (function (i) {
            xmlhttp[i] = new XMLHttpRequest();
-           var rootUrl = failures[i]
-           xmlhttp[i].open('GET', rootUrl, true)
+           var rootUrl = request.failed_build_urls[i]
+           xmlhttp[i].open('GET', rootUrl, false)
 
            xmlhttp[i].onreadystatechange = (function (req) {
               return function() {
 
                 if (req.readyState === 4) {
                   if (req.status === 200) {
+                    var resultLinks = []
                     var parser = new DOMParser
                     var dom = parser.parseFromString(req.response, 'text/html')
+
+                    // inspecting the list of failed specs
                     var pageLinkElements = dom.querySelectorAll('#main-panel tr td ul li a')
                     for(n = 0; n < pageLinkElements.length; n++) {
                       resultLinks.push(pageLinkElements[n].getAttribute('href'))
                     }
 
+                    //getting test names and stack traces
                     for(x = 0; x < resultLinks.length; x++) {
                       (function (x) {
                         if (resultLinks[x].search('xml/_empty_') == -1) {
                           xmlhttp2[x] = new XMLHttpRequest();
                           testUrl = resultLinks[x]
-                          xmlhttp2[x].open('GET', rootUrl + testUrl, true)
-
+                          xmlhttp2[x].open('GET', rootUrl + testUrl, false)
 
                           xmlhttp2[x].onreadystatechange = (function (req2) {
                             return function() {
@@ -53,7 +58,6 @@ chrome.runtime.onInstalled.addListener(function() {
                                 if (req2.status === 200) {
                                   parser = new DOMParser
                                   dom = parser.parseFromString(req2.response, 'text/html')
-                                  console.log(dom.querySelector('#main-panel > p'))
                                   var testName = ''
                                   var stackTrace = ''
                                   if(dom.querySelector('#main-panel > p > span') != null) {
@@ -62,9 +66,9 @@ chrome.runtime.onInstalled.addListener(function() {
                                   if(dom.querySelectorAll('#main-panel > pre')[1] != null) {
                                     stackTrace = dom.querySelectorAll('#main-panel > pre')[1].textContent
                                   }
-                                  data.push({test_name: testName, stack_trace: stackTrace })
+                                  data.push({name: testName, stackTrace: stackTrace })
                                   } else {
-                                    console.error('blah 2');
+                                    console.error('error retrieving test data');
                                   }
                                 }
                             }
@@ -73,18 +77,19 @@ chrome.runtime.onInstalled.addListener(function() {
                         }
                       })(x)
                     }
-
                   } else {
-                    console.error('blah 1');
+                    console.error('error retrieving build data');
                   }
                 }
               }
             }(xmlhttp[i]));
-
-
            xmlhttp[i].send(null)
          })(i);
        }
-       sendResponse({data: data })
+       if(data.length > 0) {
+         sendResponse({data: data, status: 'Completed' })
+       } else {
+         sendResponse({data: data, status: 'This project does not have test reporting' })
+       }
      }
  });
