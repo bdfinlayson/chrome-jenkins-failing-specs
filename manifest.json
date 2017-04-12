@@ -1,19 +1,18 @@
 {
   "manifest_version": 2,
-  "name": "Chrome Jenkins Failing Specs",
+  "name": "Evil Jenkins",
   "version": "1.0",
   "description": "This extension helps identify buggy specs in recent Jenkins build failures",
   "icons": {
     "128": "images/evil-jenkins.png"
   },
   "background": {
-    "scripts": ["app/background.js"],
+    "scripts": ["app/background.js", "app/failingSpecsCtrl.js", "app/app.js"],
     "persistent": false
   },
   "page_action": {
     "default_icon": { "48": "images/evil-jenkins.png" },
-    "default_title": "Failing Specs",
-    "default_popup": "index.html"
+    "default_title": "Failing Tests"
   },
   "content_scripts": [{
     "matches": ["https://*.com/view/*/job/*/", "https://*.com/job/*/"],
@@ -25,6 +24,7 @@
   "author": "Bryan Finlayson",
   "offline_enabled": false,
   "permissions": [
+    "tabs",
     "activeTab",
     "debugger",
     "storage",

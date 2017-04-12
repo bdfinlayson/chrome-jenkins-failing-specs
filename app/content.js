@@ -1,4 +1,5 @@
 failures_count = document.getElementById('buildHistory').getElementsByClassName('icon-red').length
+failures = failures_count > 0
 if(failures_count > 0) {
   failed_build_urls = []
   rows = document.getElementById('buildHistory').getElementsByClassName('build-row-cell')
@@ -9,16 +10,16 @@ if(failures_count > 0) {
   }
   console.log(failures_count)
   console.log(failed_build_urls)
-  chrome.runtime.sendMessage({
-    failures: true,
-    count: failures_count,
-    failed_build_urls: failed_build_urls,
-    root_path: window.location.href
-  },function(response) {
-      console.log(response.data, response.status)
-      names = response.data.map(function(obj) { return obj.name })
-      stacks = response.data.map(function(obj) { return obj.stackTrace })
-      console.log(names)
-      console.log(stacks)
-    })
+  chrome.storage.sync.set({
+    failedBuilds: {
+      buildUrls: failed_build_urls,
+      rootPath: window.location.href
+    }
+  }, function() {
+    if(failures) {
+      console.log('urls stored!')
+    } else {
+      console.log('no failures found')
+    }
+  })
 }

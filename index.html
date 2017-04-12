@@ -1,17 +1,16 @@
 <!DOCTYPE html>
-<html ng-app='jenkinsFailingSpecs' ng-csp>
+<html ng-app='jenkinsFailingSpecs'>
   <head>
     <title>Chrome Jenkins Failing Specs</title>
     <link rel='stylesheet' type='text/css' href='lib/bootstrap/css/bootstrap.min.css'>
     <link rel='stylesheet' type='text/css' href='css/style.css'>
   </head>
   <body ng-controller='failingSpecsCtrl'>
-    <h1>hello world</h1>
+    <button ng-click='fetchData()'>Fetch Data</button>
+    <p ng-model='scrapedData'>{{scrapedData}}</p>
 
     <script type='text/javascript' src='lib/angular/angular.js'></script>
     <script type='text/javascript' src='app/app.js'></script>
     <script type='text/javascript' src='app/failingSpecsCtrl.js'></script>
   </body>
 </html>
-
-
