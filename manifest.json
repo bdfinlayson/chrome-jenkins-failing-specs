@@ -7,7 +7,7 @@
     "128": "images/evil-jenkins.png"
   },
   "background": {
-    "scripts": ["app/background.js", "app/failingSpecsCtrl.js", "app/app.js"],
+    "scripts": ["app/background.js"],
     "persistent": false
   },
   "page_action": {

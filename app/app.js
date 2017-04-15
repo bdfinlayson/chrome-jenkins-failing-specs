@@ -1,1 +1,1 @@
-angular.module('jenkinsFailingSpecs', []);
+angular.module('evilJenkins', []);

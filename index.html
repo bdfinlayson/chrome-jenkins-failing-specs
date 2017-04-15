@@ -1,16 +1,21 @@
 <!DOCTYPE html>
-<html ng-app='jenkinsFailingSpecs'>
+<html ng-app='evilJenkins'>
   <head>
     <title>Chrome Jenkins Failing Specs</title>
     <link rel='stylesheet' type='text/css' href='lib/bootstrap/css/bootstrap.min.css'>
+    <link rel='stylesheet' type='text/css' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'>
     <link rel='stylesheet' type='text/css' href='css/style.css'>
   </head>
-  <body ng-controller='failingSpecsCtrl'>
-    <button ng-click='fetchData()'>Fetch Data</button>
-    <p ng-model='scrapedData'>{{scrapedData}}</p>
+  <body ng-controller='indexCtrl'>
+    <div class='callout' ng-show='loading'><i class='fa fa-refresh fa-spin'></i>
+      <h3>Loading your tests...</h3>
+    </div>
+    
+    <h3 ng-model='count' ng-hide='loading'>Found {{count}} failing tests</h3>
+    <p ng-model='data' ng-hide='loading'>{{data}}</p>
 
     <script type='text/javascript' src='lib/angular/angular.js'></script>
     <script type='text/javascript' src='app/app.js'></script>
-    <script type='text/javascript' src='app/failingSpecsCtrl.js'></script>
+    <script type='text/javascript' src='app/indexCtrl.js'></script>
   </body>
 </html>
