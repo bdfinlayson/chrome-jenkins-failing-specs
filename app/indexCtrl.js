@@ -2,11 +2,18 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
   $scope.loading = true;
   $scope.count = 0
   $scope.data = []
+  $scope.testsFound = true
 
   $scope.$watch('$viewContentLoaded', function(){
     $timeout(function () {
       chrome.storage.sync.get('failedBuilds', function(keys) {
-        $scope.fetch(keys.failedBuilds)
+        $scope.failedBuildsCount = keys.failedBuilds.buildUrls.length
+        if($scope.failedBuildsCount > 0) {
+          $scope.fetch(keys.failedBuilds)
+        } else {
+          $scope.testsFound = false
+          $scope.loading = false
+        }
       })
     }, 1000);
   });
@@ -92,9 +99,9 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
             name: testName,
             stackTrace: stackTrace
           })
+
           $scope.count++
           $scope.loading = false;
-          $scope.dataLoaded = true;
         } else {
           console.error('error retrieving test data');
         }

@@ -8,11 +8,14 @@
   </head>
   <body ng-controller='indexCtrl'>
     <div class='callout' ng-show='loading'><i class='fa fa-refresh fa-spin'></i>
-      <h3>Loading your tests...</h3>
+      <h3 ng-model='faildBuildsCount'>Found {{failedBuildsCount}} failed builds.</h3>
+      <h3>Searching for tests...</h3>
     </div>
-    
-    <h3 ng-model='count' ng-hide='loading'>Found {{count}} failing tests</h3>
+
+    <h3 ng-model='count' ng-hide='loading'>{{count}} failing tests in {{failedBuildsCount}} failed builds</h3>
     <p ng-model='data' ng-hide='loading'>{{data}}</p>
+
+    <h3 ng-show='!testsFound && !loading'>No tests found.</h3>
 
     <script type='text/javascript' src='lib/angular/angular.js'></script>
     <script type='text/javascript' src='app/app.js'></script>
