@@ -1,24 +1,46 @@
 <!DOCTYPE html>
 <html ng-app='evilJenkins'>
-  <head>
-    <title>Chrome Jenkins Failing Specs</title>
-    <link rel='stylesheet' type='text/css' href='lib/bootstrap/css/bootstrap.min.css'>
-    <link rel='stylesheet' type='text/css' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'>
-    <link rel='stylesheet' type='text/css' href='css/style.css'>
-  </head>
-  <body ng-controller='indexCtrl'>
-    <div class='callout' ng-show='loading'><i class='fa fa-refresh fa-spin'></i>
-      <h3 ng-model='faildBuildsCount'>Found {{failedBuildsCount}} failed builds.</h3>
-      <h3>Searching for tests...</h3>
+
+<head>
+  <title>Chrome Jenkins Failing Specs</title>
+  <link rel='stylesheet' type='text/css' href='lib/bootstrap/css/bootstrap.min.css'>
+  <link rel='stylesheet' type='text/css' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'>
+  <link rel='stylesheet' type='text/css' href='css/style.css'>
+</head>
+
+<body ng-controller='indexCtrl'>
+  <div class='callout' ng-show='loading'><i class='fa fa-refresh fa-spin'></i>
+    <h3>Searching for tests...</h3>
+  </div>
+
+  <div class='container' ng-hide='loading'>
+    <div class='row'>
+      <div class='col-md-8'>
+        <u><strong ng-model='count'>{{count}} failing tests in {{failedBuildsCount}} failed builds</strong></u>
+      </div>
+      <div class='col-md-4'>
+        <input class='form-control' type='text' ng-model='testName' placeholder='Search...'>
+      </div>
     </div>
 
-    <h3 ng-model='count' ng-hide='loading'>{{count}} failing tests in {{failedBuildsCount}} failed builds</h3>
-    <p ng-model='data' ng-hide='loading'>{{data}}</p>
+    <div class='row' id="test-list">
+      <div class='test-item col-md-12' ng-repeat='test in data | filter:testName | orderBy: time'>
+        <div class='row'>
+          <span class='test-failure-time col-md-2'><strong>Failed on:</strong> <p> {{ test.time }} </p> </span>
+          <span class='test-name col-md-4'><em>{{test.name}}</em></span>
+          <span class='test-stacktrace col-md-6'><code>{{test.stackTrace}}</code></span>
+      </div>
+    </div>
+  </div>
 
-    <h3 ng-show='!testsFound && !loading'>No tests found.</h3>
+  <div class='container' ng-show='!testsFound && !loading'>
+    <h3>No tests found.</h3>
+  </div>
 
-    <script type='text/javascript' src='lib/angular/angular.js'></script>
-    <script type='text/javascript' src='app/app.js'></script>
-    <script type='text/javascript' src='app/indexCtrl.js'></script>
-  </body>
+
+  <script type='text/javascript' src='lib/angular/angular.js'></script>
+  <script type='text/javascript' src='app/app.js'></script>
+  <script type='text/javascript' src='app/indexCtrl.js'></script>
+</body>
+
 </html>

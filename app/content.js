@@ -1,34 +1,44 @@
 function findFailures() {
+  console.log('finding failures...')
   failures_count = document.getElementById('buildHistory').getElementsByClassName('icon-red').length
   failures = failures_count > 0
   if (failures_count > 0) {
-    failed_build_urls = []
+    failedBuilds = []
     rows = document.getElementById('buildHistory').getElementsByClassName('build-row-cell')
     for (i = 0; i < rows.length; i++) {
       if (rows[i].getElementsByTagName('img')[0].alt.search('Failed') == 0) {
-        failed_build_urls.push(rows[i].getElementsByClassName('build-link display-name')[0].href)
+        failedBuilds.push({
+          url: rows[i].getElementsByClassName('build-link display-name')[0].href,
+          time: rows[i].getElementsByClassName('pane build-details')[0].getElementsByTagName('a')[0].textContent
+        })
       }
     }
-    console.log(failures_count)
-    console.log(failed_build_urls)
     chrome.storage.sync.set({
       failedBuilds: {
-        buildUrls: failed_build_urls,
+        failures: failedBuilds,
         rootPath: window.location.href
       }
     }, function() {
-      if (failures) {
-        console.log('urls stored...')
-      } else {
-        console.log('no failures found...')
+      console.log('failures saved...')
+    })
+  } else {
+    console.log('no failures found...')
+    chrome.storage.sync.set({
+      failedBuilds: {
+        failures: [],
+        rootPath: ''
       }
+    }, function() {
+      console.log('no failures found...')
     })
   }
 }
 
-document.getElementById('buildHistoryPageNav').addEventListener('click', function() {
-  console.log('finding failures...')
-  findFailures()
-})
+var buildHistoryNav = document.getElementById('buildHistoryPageNav')
+if (buildHistoryNav != null) {
+  buildHistoryNav.addEventListener('click', function() {
+    findFailures()
+  })
+}
 
 findFailures()

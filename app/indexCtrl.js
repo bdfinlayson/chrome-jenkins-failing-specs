@@ -7,7 +7,7 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
   $scope.$watch('$viewContentLoaded', function(){
     $timeout(function () {
       chrome.storage.sync.get('failedBuilds', function(keys) {
-        $scope.failedBuildsCount = keys.failedBuilds.buildUrls.length
+        $scope.failedBuildsCount = keys.failedBuilds.failures.length
         if($scope.failedBuildsCount > 0) {
           $scope.fetch(keys.failedBuilds)
         } else {
@@ -22,12 +22,13 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
     $scope.count = 0
     var xmlhttp = []
 
-    if (failedBuilds.buildUrls.length > 0) {
+    if (failedBuilds.failures.length > 0) {
       //getting build results
-      for (i = 0; i < failedBuilds.buildUrls.length; i++) {
+      for (i = 0; i < failedBuilds.failures.length; i++) {
         (function(i) {
           xmlhttp[i] = new XMLHttpRequest();
-          var rootUrl = failedBuilds.buildUrls[i]
+          var rootUrl = failedBuilds.failures[i]['url']
+          var timeFailed = failedBuilds.failures[i]['time']
           xmlhttp[i].open('GET', rootUrl, false)
 
           xmlhttp[i].onreadystatechange = (function(req) {
@@ -46,7 +47,7 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
                   }
 
                   //getting test names and stack traces
-                  $scope.getTestData(resultLinks, rootUrl)
+                  $scope.getTestData(resultLinks, rootUrl, timeFailed)
 
                 } else {
                   console.error('error retrieving build data');
@@ -60,7 +61,7 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
     }
   }
 
-  $scope.getTestData = function(resultLinks, rootUrl) {
+  $scope.getTestData = function(resultLinks, rootUrl, timeFailed) {
     var xmlhttp2 = []
 
     for (x = 0; x < resultLinks.length; x++) {
@@ -72,7 +73,7 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
 
           xmlhttp2[x].onreadystatechange = (function(req2) {
             return function() {
-              $scope.updateData(req2)
+              $scope.updateData(req2, timeFailed)
             }
           }(xmlhttp2[x]));
           xmlhttp2[x].send(null);
@@ -81,7 +82,7 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
     }
   }
 
-  $scope.updateData = function(req2) {
+  $scope.updateData = function(req2, timeFailed) {
     $scope.$apply(function() {
       if (req2.readyState === 4) {
         if (req2.status === 200) {
@@ -97,7 +98,8 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
           }
           $scope.data.push({
             name: testName,
-            stackTrace: stackTrace
+            stackTrace: stackTrace,
+            time: timeFailed
           })
 
           $scope.count++
