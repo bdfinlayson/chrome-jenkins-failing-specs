@@ -75,7 +75,7 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
 
           xmlhttp2[x].onreadystatechange = (function(req2) {
             return function() {
-              $scope.updateData(req2, timeFailed, testUrl)
+              $scope.updateData(req2, timeFailed, testUrl, rootUrl)
             }
           }(xmlhttp2[x]));
           xmlhttp2[x].send(null);
@@ -84,7 +84,7 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
     }
   }
 
-  $scope.updateData = function(req2, timeFailed, testUrl) {
+  $scope.updateData = function(req2, timeFailed, testUrl, rootUrl) {
     $scope.$apply(function() {
       if (req2.readyState === 4) {
         if (req2.status === 200) {
@@ -92,6 +92,8 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
           dom = parser.parseFromString(req2.response, 'text/html')
           var testName = ''
           var stackTrace = ''
+          var buildPathChunks = rootUrl.split('/')
+          var buildId = buildPathChunks[buildPathChunks.length - 2]
           if (dom.querySelector('#main-panel > p > span') != null) {
             testName = dom.querySelector('#main-panel > p > span').textContent
           }
@@ -102,7 +104,9 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
             name: testName,
             testUrl: testUrl,
             stackTrace: stackTrace,
-            time: timeFailed
+            time: timeFailed,
+            buildUrl: rootUrl,
+            buildId: buildId
           })
 
           $scope.count++
