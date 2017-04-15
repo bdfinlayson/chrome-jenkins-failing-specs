@@ -7,6 +7,8 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
   $scope.$watch('$viewContentLoaded', function(){
     $timeout(function () {
       chrome.storage.sync.get('failedBuilds', function(keys) {
+        $scope.projectName = keys.failedBuilds.projectName
+        $scope.projectUrl = keys.failedBuilds.rootPath
         $scope.failedBuildsCount = keys.failedBuilds.failures.length
         if($scope.failedBuildsCount > 0) {
           $scope.fetch(keys.failedBuilds)
@@ -68,12 +70,12 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
       (function(x) {
         if (resultLinks[x].search('xml/_empty_') == -1) {
           xmlhttp2[x] = new XMLHttpRequest();
-          testUrl = resultLinks[x]
-          xmlhttp2[x].open('GET', rootUrl + testUrl, false)
+          testUrl = rootUrl + resultLinks[x]
+          xmlhttp2[x].open('GET', testUrl, false)
 
           xmlhttp2[x].onreadystatechange = (function(req2) {
             return function() {
-              $scope.updateData(req2, timeFailed)
+              $scope.updateData(req2, timeFailed, testUrl)
             }
           }(xmlhttp2[x]));
           xmlhttp2[x].send(null);
@@ -82,7 +84,7 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
     }
   }
 
-  $scope.updateData = function(req2, timeFailed) {
+  $scope.updateData = function(req2, timeFailed, testUrl) {
     $scope.$apply(function() {
       if (req2.readyState === 4) {
         if (req2.status === 200) {
@@ -98,6 +100,7 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', fun
           }
           $scope.data.push({
             name: testName,
+            testUrl: testUrl,
             stackTrace: stackTrace,
             time: timeFailed
           })

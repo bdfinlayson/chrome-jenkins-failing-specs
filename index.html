@@ -15,8 +15,11 @@
 
   <div class='container' ng-hide='loading'>
     <div class='row'>
+      <h4><a href="{{projectUrl}}">{{projectName}}</a></h4>
+    </div>
+    <div class='row'>
       <div class='col-md-8'>
-        <u><strong ng-model='count'>{{count}} failing tests in {{failedBuildsCount}} failed builds</strong></u>
+        <u class='header'><strong ng-model='count'>{{count}} failing tests in {{failedBuildsCount}} failed builds</strong></u>
       </div>
       <div class='col-md-4'>
         <input class='form-control' type='text' ng-model='testName' placeholder='Search...'>
@@ -27,7 +30,7 @@
       <div class='test-item col-md-12' ng-repeat='test in data | filter:testName | orderBy: time'>
         <div class='row'>
           <span class='test-failure-time col-md-2'><strong>Failed on:</strong> <p> {{ test.time }} </p> </span>
-          <span class='test-name col-md-4'><em>{{test.name}}</em></span>
+          <span class='test-name col-md-4'><em><a href="{{test.testUrl}}">{{test.name}}</a></em></span>
           <span class='test-stacktrace col-md-6'><code>{{test.stackTrace}}</code></span>
       </div>
     </div>

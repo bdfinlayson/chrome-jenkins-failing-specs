@@ -16,7 +16,8 @@ function findFailures() {
     chrome.storage.sync.set({
       failedBuilds: {
         failures: failedBuilds,
-        rootPath: window.location.href
+        rootPath: window.location.href,
+        projectName: document.getElementsByClassName("job-index-headline page-headline")[0].textContent
       }
     }, function() {
       console.log('failures saved...')
@@ -26,7 +27,8 @@ function findFailures() {
     chrome.storage.sync.set({
       failedBuilds: {
         failures: [],
-        rootPath: ''
+        rootPath: window.location.href,
+        projectName: document.getElementsByClassName("job-index-headline page-headline")[0].textContent
       }
     }, function() {
       console.log('no failures found...')
