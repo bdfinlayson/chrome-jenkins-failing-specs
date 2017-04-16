@@ -8,7 +8,7 @@
   <link rel='stylesheet' type='text/css' href='css/style.css'>
 </head>
 
-<body ng-controller='indexCtrl' ng-init='init()'>
+<body ng-controller='indexCtrl'>
   <div class='callout' ng-show='loading'><i class='fa fa-refresh fa-spin'></i>
     <h3>Scanning {{buildCount}} builds...</h3>
     <h3>Scanning {{ testCount }} tests...</h3>
@@ -27,28 +27,28 @@
       </div>
     </div>
 
-  <div class='container' ng-show='!loading'>
-    <div class='row' id="test-list">
-      <div class='test-item col-md-12' ng-repeat='test in data | filter:testName | orderBy: time'>
-        <div class='row'>
-          <span class='col-md-2'>
+    <div class='container' ng-show='!loading'>
+      <div class='row' id="test-list">
+        <div class='test-item col-md-12' ng-repeat='test in data | filter:testName | orderBy: time'>
+          <div class='row'>
+            <span class='col-md-2'>
             <p><strong>Failure:</strong> <a href="{{test.buildUrl}}" target="_blank"> Build #{{ test.buildId }} at {{ test.time }}</a></p>
           </span>
-          <span class='col-md-4'><em><p><a href="{{test.testUrl}}" target="_blank">{{test.name}}</a></p></em></span>
-          <span class='col-md-6'><p><code>{{test.stackTrace}}</code></p></span>
+            <span class='col-md-4'><em><p><a href="{{test.testUrl}}" target="_blank">{{test.name}}</a></p></em></span>
+            <span class='col-md-6'><p><code>{{test.stackTrace}}</code></p></span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class='container' ng-show='!testsFound && !loading'>
-    <h3>No tests were found.</h3>
-  </div>
+    <div class='container' ng-show='!testsFound && !loading'>
+      <h3>No tests were found.</h3>
+    </div>
 
 
-  <script type='text/javascript' src='lib/angular/angular.js'></script>
-  <script type='text/javascript' src='app/app.js'></script>
-  <script type='text/javascript' src='app/indexCtrl.js'></script>
+    <script type='text/javascript' src='lib/angular/angular.js'></script>
+    <script type='text/javascript' src='app/app.js'></script>
+    <script type='text/javascript' src='app/indexCtrl.js'></script>
 </body>
 
 </html>

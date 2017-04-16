@@ -1,29 +1,29 @@
 angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', '$http', function($scope, $timeout, $http) {
 
-  $scope.init = function() {
-    $scope.loading = true;
-    $scope.buildCount = 0
-    $scope.testCount = 0
-    $scope.testsFound = true
-    $scope.completed = false
-    $scope.data = []
-  }
+  $scope.loading = true;
+  $scope.buildCount = 0
+  $scope.testCount = 0
+  $scope.testsFound = true
+  $scope.data = []
 
   $scope.$watch('testCount', function() {
-    console.log($http.pendingRequests.length)
-    if(($scope.buildCount == $scope.failedBuildsCount) && ($http.pendingRequests.length == 0)) {
+
+    if (($scope.buildCount == $scope.failedBuildsCount) && ($http.pendingRequests.length == 0)) {
       $scope.loading = false
-      $scope.completed = true
+    }
+    if (($scope.buildCount == $scope.failedBuildsCount) && ($http.pendingRequests.length == 0) && ($scope.testCount == 0)) {
+      $scope.loading = false
+      $scope.testsFound = false
     }
   })
 
-  $scope.$watch('$viewContentLoaded', function(){
+  $scope.$watch('$viewContentLoading', function() {
     chrome.storage.sync.get('failedBuilds', function(keys) {
       $scope.projectName = keys.failedBuilds.projectName
       $scope.projectUrl = keys.failedBuilds.rootPath
       $scope.failedBuildsCount = keys.failedBuilds.failures.length
 
-      if($scope.failedBuildsCount > 0) {
+      if ($scope.failedBuildsCount > 0) {
         $scope.fetchBuildData(keys.failedBuilds)
       } else {
         $scope.testsFound = false
@@ -34,9 +34,6 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', '$h
 
 
   $scope.fetchBuildData = function(failedBuilds) {
-    $scope.count = 0
-    var xmlhttp = []
-
     if (failedBuilds.failures.length > 0) {
       for (i = 0; i < failedBuilds.failures.length; i++) {
         $scope.getBuild(failedBuilds.failures[i])
@@ -51,7 +48,7 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', '$h
     }).then(function successCallback(response) {
       $scope.buildCount += 1
       testLinks = $scope.scrapeBuildPage(response.data)
-      for(i = 0; i < testLinks.length; i++) {
+      for (i = 0; i < testLinks.length; i++) {
         if (testLinks[i].search('xml/_empty_') == -1) {
           $scope.getTest(testLinks[i], build)
         }
@@ -78,7 +75,7 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', '$h
     $http({
       method: 'GET',
       url: build.url + testUrl
-    }).then(function successCallback(response){
+    }).then(function successCallback(response) {
       $scope.testCount += 1
       $scope.scrapeTestPage(response.data, testUrl, build)
     }, function errorCallback(response) {
