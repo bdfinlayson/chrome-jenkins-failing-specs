@@ -8,24 +8,26 @@
   <link rel='stylesheet' type='text/css' href='css/style.css'>
 </head>
 
-<body ng-controller='indexCtrl'>
+<body ng-controller='indexCtrl' ng-init='init()'>
   <div class='callout' ng-show='loading'><i class='fa fa-refresh fa-spin'></i>
-    <h3>Searching for tests...</h3>
+    <h3>Scanning {{buildCount}} builds...</h3>
+    <h3>Scanning {{ testCount }} tests...</h3>
   </div>
 
-  <div class='container' ng-hide='loading'>
+  <div class='container' ng-show='!loading'>
     <div class='row'>
       <h4><a href="{{projectUrl}}" target="_blank">{{projectName}}</a></h4>
     </div>
     <div class='row'>
       <div class='col-md-8'>
-        <u class='header'><strong ng-model='count'>{{count}} failing tests in {{failedBuildsCount}} failed builds</strong></u>
+        <u class='header'><strong ng-model='count'>{{testCount}} failing tests in {{buildCount}} failed builds</strong></u>
       </div>
       <div class='col-md-4'>
         <input class='form-control' type='text' ng-model='testName' placeholder='Search...'>
       </div>
     </div>
 
+  <div class='container' ng-show='!loading'>
     <div class='row' id="test-list">
       <div class='test-item col-md-12' ng-repeat='test in data | filter:testName | orderBy: time'>
         <div class='row'>
@@ -34,12 +36,13 @@
           </span>
           <span class='col-md-4'><em><p><a href="{{test.testUrl}}" target="_blank">{{test.name}}</a></p></em></span>
           <span class='col-md-6'><p><code>{{test.stackTrace}}</code></p></span>
+        </div>
       </div>
     </div>
   </div>
 
   <div class='container' ng-show='!testsFound && !loading'>
-    <h3>No tests found.</h3>
+    <h3>No tests were found.</h3>
   </div>
 
 
