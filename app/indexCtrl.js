@@ -1,121 +1,131 @@
-angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', function($scope, $timeout) {
+angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', '$http', function($scope, $timeout, $http) {
+
   $scope.loading = true;
-  $scope.count = 0
-  $scope.data = []
+  $scope.buildCount = 0
+  $scope.testCount = 0
   $scope.testsFound = true
+  $scope.data = []
+  $scope.buildHasTests = []
 
-  $scope.$watch('$viewContentLoaded', function(){
-    $timeout(function () {
-      chrome.storage.sync.get('failedBuilds', function(keys) {
-        $scope.projectName = keys.failedBuilds.projectName
-        $scope.projectUrl = keys.failedBuilds.rootPath
-        $scope.failedBuildsCount = keys.failedBuilds.failures.length
-        if($scope.failedBuildsCount > 0) {
-          $scope.fetch(keys.failedBuilds)
-        } else {
-          $scope.testsFound = false
-          $scope.loading = false
-        }
-      })
-    }, 1000);
-  });
+  $scope.$watch('$viewContentLoading', function() {
+    chrome.storage.sync.get('failedBuilds', function(keys) {
+      $scope.projectName = keys.failedBuilds.projectName
+      $scope.projectUrl = keys.failedBuilds.rootPath
+      $scope.failedBuildsCount = keys.failedBuilds.failures.length
 
-  $scope.fetch = function(failedBuilds) {
-    $scope.count = 0
-    var xmlhttp = []
-
-    if (failedBuilds.failures.length > 0) {
-      //getting build results
-      for (i = 0; i < failedBuilds.failures.length; i++) {
-        (function(i) {
-          xmlhttp[i] = new XMLHttpRequest();
-          var rootUrl = failedBuilds.failures[i]['url']
-          var timeFailed = failedBuilds.failures[i]['time']
-          xmlhttp[i].open('GET', rootUrl, false)
-
-          xmlhttp[i].onreadystatechange = (function(req) {
-            return function() {
-
-              if (req.readyState === 4) {
-                if (req.status === 200) {
-                  var resultLinks = []
-                  var parser = new DOMParser
-                  var dom = parser.parseFromString(req.response, 'text/html')
-
-                  // inspecting the list of failed specs
-                  var pageLinkElements = dom.querySelectorAll('#main-panel tr td ul li a')
-                  for (n = 0; n < pageLinkElements.length; n++) {
-                    resultLinks.push(pageLinkElements[n].getAttribute('href'))
-                  }
-
-                  //getting test names and stack traces
-                  $scope.getTestData(resultLinks, rootUrl, timeFailed)
-
-                } else {
-                  console.error('error retrieving build data');
-                }
-              }
-            }
-          }(xmlhttp[i]));
-          xmlhttp[i].send(null)
-        })(i);
-      }
-    }
-  }
-
-  $scope.getTestData = function(resultLinks, rootUrl, timeFailed) {
-    var xmlhttp2 = []
-
-    for (x = 0; x < resultLinks.length; x++) {
-      (function(x) {
-        if (resultLinks[x].search('xml/_empty_') == -1) {
-          xmlhttp2[x] = new XMLHttpRequest();
-          testUrl = rootUrl + resultLinks[x]
-          xmlhttp2[x].open('GET', testUrl, false)
-
-          xmlhttp2[x].onreadystatechange = (function(req2) {
-            return function() {
-              $scope.updateData(req2, timeFailed, testUrl, rootUrl)
-            }
-          }(xmlhttp2[x]));
-          xmlhttp2[x].send(null);
-        }
-      })(x)
-    }
-  }
-
-  $scope.updateData = function(req2, timeFailed, testUrl, rootUrl) {
-    $scope.$apply(function() {
-      if (req2.readyState === 4) {
-        if (req2.status === 200) {
-          parser = new DOMParser
-          dom = parser.parseFromString(req2.response, 'text/html')
-          var testName = ''
-          var stackTrace = ''
-          var buildPathChunks = rootUrl.split('/')
-          var buildId = buildPathChunks[buildPathChunks.length - 2]
-          if (dom.querySelector('#main-panel > p > span') != null) {
-            testName = dom.querySelector('#main-panel > p > span').textContent
-          }
-          if (dom.querySelectorAll('#main-panel > pre')[1] != null) {
-            stackTrace = dom.querySelectorAll('#main-panel > pre')[1].textContent
-          }
-          $scope.data.push({
-            name: testName,
-            testUrl: testUrl,
-            stackTrace: stackTrace,
-            time: timeFailed,
-            buildUrl: rootUrl,
-            buildId: buildId
-          })
-
-          $scope.count++
-          $scope.loading = false;
-        } else {
-          console.error('error retrieving test data');
-        }
+      if ($scope.failedBuildsCount > 0) {
+        $scope.fetchBuildData(keys.failedBuilds)
+      } else {
+        $scope.testsFound = false
+        $scope.loading = false
       }
     })
+  });
 
+  $scope.$watch('testCount', function() {
+    if (($scope.buildCount == $scope.failedBuildsCount) && ($http.pendingRequests.length == 0)) {
+      $scope.loading = false
+    }
+  })
+
+  $scope.$watch('buildHasTests', function() {
+    function isFalse(item) {
+      return item == false
+    }
+    console.log(($scope.buildHasTests.every(isFalse) && ($scope.buildCount == $scope.failedBuildsCount)))
+    if($scope.buildHasTests.every(isFalse) && ($scope.buildCount == $scope.failedBuildsCount)) {
+      $scope.testsFound = false
+    }
+  })
+
+  $scope.isFalse = function(item) {
+    return item == false
+  }
+
+  $scope.fetchBuildData = function(failedBuilds) {
+    if (failedBuilds.failures.length > 0) {
+      for (i = 0; i < failedBuilds.failures.length; i++) {
+        $scope.getBuild(failedBuilds.failures[i])
+      }
+    }
+  }
+
+  $scope.getBuild = function(build) {
+    $http({
+      method: 'GET',
+      url: build.url
+    }).then(function successCallback(response) {
+      $scope.buildCount += 1
+      testLinks = $scope.scrapeBuildPage(response.data)
+      for (i = 0; i < testLinks.length; i++) {
+        if (testLinks[i].search('xml/_empty_') == -1) {
+          $scope.getTest(testLinks[i], build)
+        }
+      }
+
+      if($scope.buildHasTests.every($scope.isFalse) && ($scope.buildCount == $scope.failedBuildsCount) && ($http.pendingRequests.length == 0)) {
+        $scope.testsFound = false
+        $scope.loading = false
+      }
+
+    }, function errorCallback(response) {
+      console.log(response.statusText)
+    })
+  }
+
+  $scope.scrapeBuildPage = function(page) {
+    var testLinks = []
+    var parser = new DOMParser
+    var dom = parser.parseFromString(page, 'text/html')
+
+    // inspecting the list of failed specs
+    var clipboard = dom.querySelector('#main-panel .icon-clipboard')
+    if (clipboard != null) {
+      var pageLinkElements = clipboard.closest('tr').querySelectorAll('li a')
+      for (n = 0; n < pageLinkElements.length; n++) {
+        testLinks.push(pageLinkElements[n].getAttribute('href'))
+      }
+    }
+
+    if(testLinks.length == 0) {
+      $scope.buildHasTests.push(false)
+    }
+
+    return testLinks
+  }
+
+  $scope.getTest = function(testUrl, build) {
+    $http({
+      method: 'GET',
+      url: build.url + testUrl
+    }).then(function successCallback(response) {
+      $scope.testCount += 1
+      $scope.scrapeTestPage(response.data, testUrl, build)
+    }, function errorCallback(response) {
+      console.log(response.statusText)
+    })
+  }
+
+  $scope.scrapeTestPage = function(page, testUrl, build) {
+    parser = new DOMParser
+    dom = parser.parseFromString(page, 'text/html')
+    var testName = ''
+    var stackTrace = ''
+    var buildPathChunks = build.url.split('/')
+    var buildId = buildPathChunks[buildPathChunks.length - 2]
+    if (dom.querySelector('#main-panel > p > span') != null) {
+      testName = dom.querySelector('#main-panel > p > span').textContent
+    }
+    if (dom.querySelectorAll('#main-panel > pre')[1] != null) {
+      stackTrace = dom.querySelectorAll('#main-panel > pre')[1].textContent
+    }
+    $scope.data.push({
+      name: testName,
+      testUrl: build.url + testUrl,
+      stackTrace: stackTrace,
+      time: build.time,
+      buildUrl: build.url,
+      buildId: buildId
+    })
   }
 }]);
