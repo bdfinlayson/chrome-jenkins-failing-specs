@@ -5,17 +5,7 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', '$h
   $scope.testCount = 0
   $scope.testsFound = true
   $scope.data = []
-
-  $scope.$watch('testCount', function() {
-
-    if (($scope.buildCount == $scope.failedBuildsCount) && ($http.pendingRequests.length == 0)) {
-      $scope.loading = false
-    }
-    if (($scope.buildCount == $scope.failedBuildsCount) && ($http.pendingRequests.length == 0) && ($scope.testCount == 0)) {
-      $scope.loading = false
-      $scope.testsFound = false
-    }
-  })
+  $scope.buildHasTests = []
 
   $scope.$watch('$viewContentLoading', function() {
     chrome.storage.sync.get('failedBuilds', function(keys) {
@@ -32,6 +22,25 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', '$h
     })
   });
 
+  $scope.$watch('testCount', function() {
+    if (($scope.buildCount == $scope.failedBuildsCount) && ($http.pendingRequests.length == 0)) {
+      $scope.loading = false
+    }
+  })
+
+  $scope.$watch('buildHasTests', function() {
+    function isFalse(item) {
+      return item == false
+    }
+    console.log(($scope.buildHasTests.every(isFalse) && ($scope.buildCount == $scope.failedBuildsCount)))
+    if($scope.buildHasTests.every(isFalse) && ($scope.buildCount == $scope.failedBuildsCount)) {
+      $scope.testsFound = false
+    }
+  })
+
+  $scope.isFalse = function(item) {
+    return item == false
+  }
 
   $scope.fetchBuildData = function(failedBuilds) {
     if (failedBuilds.failures.length > 0) {
@@ -53,6 +62,12 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', '$h
           $scope.getTest(testLinks[i], build)
         }
       }
+
+      if($scope.buildHasTests.every($scope.isFalse) && ($scope.buildCount == $scope.failedBuildsCount) && ($http.pendingRequests.length == 0)) {
+        $scope.testsFound = false
+        $scope.loading = false
+      }
+
     }, function errorCallback(response) {
       console.log(response.statusText)
     })
@@ -64,10 +79,18 @@ angular.module('evilJenkins').controller('indexCtrl', ['$scope', '$timeout', '$h
     var dom = parser.parseFromString(page, 'text/html')
 
     // inspecting the list of failed specs
-    var pageLinkElements = dom.querySelectorAll('#main-panel tr td ul li a')
-    for (n = 0; n < pageLinkElements.length; n++) {
-      testLinks.push(pageLinkElements[n].getAttribute('href'))
+    var clipboard = dom.querySelector('#main-panel .icon-clipboard')
+    if (clipboard != null) {
+      var pageLinkElements = clipboard.closest('tr').querySelectorAll('li a')
+      for (n = 0; n < pageLinkElements.length; n++) {
+        testLinks.push(pageLinkElements[n].getAttribute('href'))
+      }
     }
+
+    if(testLinks.length == 0) {
+      $scope.buildHasTests.push(false)
+    }
+
     return testLinks
   }
 
